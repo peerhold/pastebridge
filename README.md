@@ -83,6 +83,19 @@ chmod +x pastebridge-mac-v1_1 && \
 ./pastebridge-mac-v1_1
 ```
 
+### macOS Intel
+
+```bash
+curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz && \
+curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz.sha256 && \
+awk '{print $1" *pastebridge-mac-intel-v1_1.tar.gz"}' pastebridge-mac-intel-v1_1.tar.gz.sha256 | shasum -a 256 -c - && \
+tar -xzf pastebridge-mac-intel-v1_1.tar.gz && \
+chmod +x pastebridge-mac-intel-v1_1 && \
+./pastebridge-mac-intel-v1_1
+```
+
+The binary is unsigned, so Gatekeeper asks the first time. Right-click and choose **Open**, or run `xattr -d com.apple.quarantine pastebridge-mac-intel-v1_1`.
+
 ---
 
 ### Windows x86-64 · PowerShell
