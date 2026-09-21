@@ -64,8 +64,8 @@ Download, check the hash, unpack, run.
 ### Linux x86-64
 
 ```bash
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-v1_1.tar.gz && \
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-v1_1.tar.gz.sha256 && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-v1_1.tar.gz && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-v1_1.tar.gz.sha256 && \
 awk '{print $1" *pastebridge-linux-v1_1.tar.gz"}' pastebridge-linux-v1_1.tar.gz.sha256 | sha256sum -c - && \
 tar -xzf pastebridge-linux-v1_1.tar.gz && \
 chmod +x pastebridge-linux-v1_1 && \
@@ -75,8 +75,8 @@ chmod +x pastebridge-linux-v1_1 && \
 ### macOS Apple Silicon
 
 ```bash
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-v1_1.tar.gz && \
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-v1_1.tar.gz.sha256 && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-v1_1.tar.gz && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-v1_1.tar.gz.sha256 && \
 awk '{print $1" *pastebridge-mac-v1_1.tar.gz"}' pastebridge-mac-v1_1.tar.gz.sha256 | shasum -a 256 -c - && \
 tar -xzf pastebridge-mac-v1_1.tar.gz && \
 chmod +x pastebridge-mac-v1_1 && \
@@ -86,8 +86,8 @@ chmod +x pastebridge-mac-v1_1 && \
 ### macOS Intel
 
 ```bash
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz && \
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz.sha256 && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-mac-intel-v1_1.tar.gz.sha256 && \
 awk '{print $1" *pastebridge-mac-intel-v1_1.tar.gz"}' pastebridge-mac-intel-v1_1.tar.gz.sha256 | shasum -a 256 -c - && \
 tar -xzf pastebridge-mac-intel-v1_1.tar.gz && \
 chmod +x pastebridge-mac-intel-v1_1 && \
@@ -101,8 +101,8 @@ The binary is unsigned, so Gatekeeper asks the first time. Right-click and choos
 ### Windows x86-64 · PowerShell
 
 ```powershell
-curl.exe -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-v1_1.zip
-curl.exe -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-v1_1.zip.sha256
+curl.exe -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-v1_1.zip
+curl.exe -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-v1_1.zip.sha256
 $want = (Get-Content pastebridge-v1_1.zip.sha256 -Raw).Trim().Split(' ')[0].ToLower()
 $got  = (Get-FileHash pastebridge-v1_1.zip -Algorithm SHA256).Hash.ToLower()
 if ($got -eq $want) { Expand-Archive pastebridge-v1_1.zip -DestinationPath . -Force; .\pastebridge-v1_1.exe } else { Write-Error 'Checksum failed' }
@@ -115,8 +115,8 @@ After the first run, you can also start it by double-clicking `pastebridge-v1_1.
 ### Windows on ARM Snapdragon · PowerShell
 
 ```powershell
-curl.exe -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-arm64-snapdragon-v1_1.zip
-curl.exe -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-arm64-snapdragon-v1_1.zip.sha256
+curl.exe -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-arm64-snapdragon-v1_1.zip
+curl.exe -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-arm64-snapdragon-v1_1.zip.sha256
 $want = (Get-Content pastebridge-arm64-snapdragon-v1_1.zip.sha256 -Raw).Trim().Split(' ')[0].ToLower()
 $got  = (Get-FileHash pastebridge-arm64-snapdragon-v1_1.zip -Algorithm SHA256).Hash.ToLower()
 if ($got -eq $want) { Expand-Archive pastebridge-arm64-snapdragon-v1_1.zip -DestinationPath . -Force } else { Write-Error 'Checksum failed' }
@@ -127,8 +127,8 @@ if ($got -eq $want) { Expand-Archive pastebridge-arm64-snapdragon-v1_1.zip -Dest
 ### Raspberry Pi OS 64-bit · Headless (Shared to Phone)
 
 ```bash
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-arm64-pios-modern-v1_1.tar.gz && \
-curl -fLO https://github.com/0xPeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-arm64-pios-modern-v1_1.tar.gz.sha256 && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-arm64-pios-modern-v1_1.tar.gz && \
+curl -fLO https://github.com/PeerHold/pastebridge/releases/download/v1.1/pastebridge-linux-arm64-pios-modern-v1_1.tar.gz.sha256 && \
 awk '{print $1" *pastebridge-linux-arm64-pios-modern-v1_1.tar.gz"}' pastebridge-linux-arm64-pios-modern-v1_1.tar.gz.sha256 | sha256sum -c - && \
 tar -xzf pastebridge-linux-arm64-pios-modern-v1_1.tar.gz && \
 chmod +x pastebridge-linux-arm64-pios-modern-v1_1 && \
