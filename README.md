@@ -14,6 +14,7 @@ It's one binary for Linux, macOS, Windows, or ARM. There is no account, no sign-
 - [Security Overview](#security-overview)
 - [Quick Start](#quick-start)
 - [Using pastebridge](#using-pastebridge)
+- [Piping Output In](#piping-output-in)
 - [Sharing with Another Device](#sharing-with-another-device)
 - [Running Headless](#running-headless)
 - [Quitting, and Quitting by Itself](#quitting-and-quitting-by-itself)
@@ -28,18 +29,21 @@ It's one binary for Linux, macOS, Windows, or ARM. There is no account, no sign-
 
 1. **Run the binary:** Run the single file on the machine with the problem. Your browser opens at `http://127.0.0.1:8787/`, or use `-headless` where there is no browser at all.
 2. **Switch sharing on:** A TLS listener starts on your local network and shows an address and a six-digit PIN. Sharing stays off until you ask for it, and off means no listener exists.
-3. **Paste one way, copy the other:** Output goes up the log lane and lands on the other device. Commands come back down the command lane, each with its own copy button.
+3. **Open it on the other device:** In the browser it already has. Enter the PIN once. Nothing to install.
 
 ## The Loop It's For
 
-1. **Something breaks where you can't copy text.** A Pi on a shelf, a server you reached over SSH from a phone, a VM console with no clipboard integration, or a machine whose only screen is on a different desk.
-2. **You paste the output into the log lane.** It lands on the other device immediately, with its whitespace intact and its own copy button.
-3. **You work the problem on the machine with a keyboard.** Read it, search it, check the docs, ask a colleague, or paste it into a language model. `pastebridge` is the wire between the two screens and has no opinion about what happens at either end.
-4. **The command comes back and copies with one tap.** One command per entry, because a phone can't select half a line of text without a fight.
+The copying is the problem this solves. If you have a terminal in front of you and SSH set up, use that instead.
+
+1. **The commands are here. The help is over there.** You're on a phone, a console with no clipboard passthrough, or a machine whose only screen is on another desk. The command you need is long and full of quotes and braces, and the output you need to read is two hundred lines. Both move badly between screens.
+2. **The output goes up the log lane.** Paste it, or pipe it straight in with `journalctl -n 100 | pastebridge` on a machine with no browser at all. It lands on the other device immediately, with its whitespace intact and its own copy button.
+3. **You work the problem where the keyboard is.** Search it, read the docs, ask a colleague, or hand it to whatever model you use. That part happens in your client: `pastebridge` has no model, no API key, and no outbound connection, so it isn't in that conversation.
+4. **The command comes back and copies with one tap.** One command per entry, because selecting text on a phone is a fight and retyping a long command is worse. Run it, pipe the result back, and go round again.
 
 ## Core Features
 
 * **Two Lanes, One Feed:** Output and commands stay in separate columns instead of interleaving, and every command gets its own copy button.
+* **Piped Input:** `dmesg | pastebridge` puts output in a lane with no browser and no clipboard involved. See [Piping Output In](#piping-output-in).
 * **Prompt Stripping:** A leading `$ ` or `# ` is removed from every command line on the way in, so what you copy is the command and not somebody's prompt.
 * **Readable Long Output:** Entries longer than about nine lines are clipped with a **Show all** control, so one huge stack trace doesn't bury everything below it.
 * **Memory Only:** Entries live in the process, capped at the most recent 500 across both lanes, and disappear when it stops.
@@ -54,6 +58,7 @@ Read this before you switch sharing on.
 * **Full Access:** A paired device is not read-only. It can send to and clear both lanes, exactly as the host can.
 * **Encryption:** The certificate is self-signed, so your browser warns you once. It defeats passive listening on the network, but not someone already positioned between your two devices.
 * **What You Paste:** Terminal output can contain tokens, connection strings, hostnames, paths, and environment variables. Nothing is redacted, so look before you send.
+* **Anything Local Can Write:** The console listener treats any loopback caller as the host, with no PIN. That's what makes piping work, and it means any process running on that machine can add entries.
 * **Commands Are Just Text:** Nothing runs, inspects, parses, or validates what arrives in either lane. The absence of a warning is not an assurance. You are the execution step, in your own terminal.
 * **Lifespan:** Pairing expires after 12 hours. Switching sharing off ends every paired session, and turning it back on means pairing again.
 
@@ -135,7 +140,7 @@ chmod +x pastebridge-linux-arm64-pios-modern-v1_1 && \
 ./pastebridge-linux-arm64-pios-modern-v1_1 -headless -exit-on-idle 0
 ```
 
-All archives and their SHA-256 files are on the [Releases page](https://github.com/0xPeerHold/pastebridge/releases). Check the hash before you unpack.
+All archives and their SHA-256 files are on the [Releases page](https://github.com/PeerHold/pastebridge/releases). Check the hash before you unpack.
 
 > **Note:** The examples below use `./pastebridge` for short. Use the file name for your platform, such as `./pastebridge-linux-v1_1`.
 
@@ -171,6 +176,28 @@ On HTTPS or `localhost`, the browser's clipboard API is used. On a plain-HTTP ad
 ### Clearing
 
 **Clear** at the top of a lane empties it on the host and on every paired device at once. There is no undo and no trash.
+
+## Piping Output In
+
+On a machine with no browser, or when you'd rather not select text at all, pipe it:
+
+```bash
+dmesg | pastebridge                                  # into the log lane
+journalctl -u nginx -n 100 | pastebridge             # same
+echo "systemctl restart nginx" | pastebridge -lane cmd   # into the command lane
+```
+
+What happens depends on whether pastebridge is already running on that machine:
+
+* **Already running:** the text is handed to it over loopback and the pipe exits immediately. This is the everyday case. Leave one running and pipe into it as often as you like.
+* **Not running:** this run takes the text, starts up as usual, and the entry is waiting for the first browser that attaches.
+
+Notes:
+
+* `-lane` accepts `log` (the default) or `cmd`. Anything else is an error.
+* Input is capped at about 512 KB, the same limit the paste box has. Longer input is truncated, with a warning on stderr.
+* Piping into a fresh start with `-headless` or `-no-browser` needs `-exit-on-idle 0`, or it quits before you can read it. It warns you if you forget.
+* The handoff is a loopback request to the console listener, which needs no PIN, so nothing leaves the machine.
 
 ## Sharing with Another Device
 
@@ -209,7 +236,7 @@ On a server or Raspberry Pi with no browser:
 ./pastebridge -headless -exit-on-idle 0
 ```
 
-`-headless` starts without a browser, switches sharing on, and prints the address and PIN to the terminal. Open it from a laptop or phone.
+`-headless` starts without a browser, switches sharing on, and prints the address and PIN to the terminal. Open it from a laptop or phone. Once it's running, `command | pastebridge` from the same machine drops output straight into a lane.
 
 **Always pass `-exit-on-idle 0` with `-headless`.** The idle timer counts time since any browser was attached, which on a headless machine is the whole uptime, so with the default it stops before you can connect.
 
@@ -253,6 +280,7 @@ An open tab holds a live connection, so the timer stays at zero however long the
 | `-share` | off | Switch sharing on at startup |
 | `-headless` | off | No browser, sharing on, for a server or Pi |
 | `-no-browser` | off | Don't open a browser at startup |
+| `-lane` | `log` | Lane for piped input: `log` or `cmd` |
 | `-exit-on-idle` | `5s` | Quit this long after the last browser detaches. `0` never quits |
 
 `PORT`, `SHARE_PORT`, and `PIN` also work as environment variables. The command-line flag wins over the variable.
@@ -290,6 +318,8 @@ Delete the directory and the next run makes a fresh pair, at the cost of accepti
 
 **"Port already in use."** Either pastebridge is already running (check your other tabs) or something else has the port. Use `-port 8900`, and `-share-port 8901` if the conflict is on the sharing side.
 
+**A pipe didn't reach the running copy.** It only looks on `127.0.0.1` at the console port. If you started that copy with `-port 8900`, pipe with `-port 8900` too.
+
 **Sharing won't switch on.** Either the share port is busy, which the panel tells you, or no certificate could be created at startup, which the terminal reported. In the second case, sharing is unavailable for that whole run.
 
 **My phone can't reach the shared address.** Both devices must be on the same network. Many guest and public networks isolate clients from each other, and the app can't work around that. The share panel lists every address the machine answers on, so try the others if the first fails.
@@ -304,14 +334,12 @@ Delete the directory and the next run makes a fresh pair, at the cost of accepti
 
 ## What It Doesn't Do
 
-Listed as features, because that's what they are.
-
 * **It never runs anything.** Nothing arriving in either lane is executed on either end.
 * **It doesn't check whether anything is correct or safe.** Text arrives exactly as typed, and no warning is not the same as no risk.
 * **It doesn't redact.** Every paired device sees what you paste, tokens and all.
 * **It doesn't work over the internet.** There's no relay or rendezvous server, so both devices must be on the same network, or joined by something that makes them look that way, such as a VPN or a tailnet.
 * **It doesn't keep anything.** That's a feature until you close the tab expecting to come back.
-* **It has no terminal interface.** The interface is a web page. The shell is only for startup options.
+* **It has no terminal interface.** The interface is a web page, and the shell is for startup options and pipes.
 * No account, no telemetry, no update check, no subscription, and nothing left behind when the process exits.
 
 ### A Note on Language Models
@@ -352,7 +380,7 @@ ls -la ~/.pastebridge/
 ldd ./pastebridge-linux-v1_1
 ```
 
-Nothing here depends on trusting the page you're reading. Repeat check 2 after switching sharing on, and again after switching it off: off means the listener is gone, not idle.
+Repeat check 2 after switching sharing on, and again after switching it off: off means the listener is gone, not idle. Piping adds no listener, so check 2 looks the same either way.
 
 The retention figures above are stated in the privacy notice shipped with the application, which is the authoritative version.
 
@@ -370,4 +398,4 @@ Consumer protection law in your country may give you rights that can't be exclud
 
 ### Publisher
 
-© 2026 0xPeerHold LLC
+© 2026 PeerHold
